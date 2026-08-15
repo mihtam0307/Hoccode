@@ -1,0 +1,1587 @@
+let currentLesson = 0;
+
+let editor = null;
+
+let pyodide = null;
+
+
+/* ==================================================
+   MONACO EDITOR
+================================================== */
+
+require.config({
+
+  paths: {
+
+    vs:
+      "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.2/min/vs"
+
+  }
+
+});
+
+
+require(
+  ["vs/editor/editor.main"],
+  function () {
+
+    editor =
+      monaco.editor.create(
+        document.getElementById("editor"),
+        {
+
+          value:
+            lessons[0].code,
+
+          language:
+            "python",
+
+          theme:
+            "vs-dark",
+
+          automaticLayout:
+            true,
+
+          minimap: {
+            enabled: false
+          },
+
+          fontSize:
+            13,
+
+          fontFamily:
+            "JetBrains Mono, Consolas, monospace",
+
+          padding: {
+            top: 15,
+            bottom: 15
+          },
+
+          smoothScrolling:
+            true,
+
+          scrollBeyondLastLine:
+            false
+
+        }
+      );
+
+  }
+);
+
+
+/* ==================================================
+   THEME
+================================================== */
+
+function toggleTheme() {
+
+  document.body.classList.toggle("dark");
+
+  localStorage.setItem(
+
+    "codevn-theme",
+
+    document.body.classList.contains("dark")
+      ? "dark"
+      : "light"
+
+  );
+
+}
+
+
+/* ==================================================
+   TAB
+================================================== */
+
+function switchTab(tab, button) {
+
+  document
+    .querySelectorAll(".tab")
+    .forEach(
+      element =>
+        element.classList.remove("active")
+    );
+
+
+  button.classList.add("active");
+
+
+  document
+    .getElementById("lessonContent")
+    .classList.toggle(
+      "hidden",
+      tab !== "lesson"
+    );
+
+
+  document
+    .getElementById("docsContent")
+    .classList.toggle(
+      "hidden",
+      tab !== "docs"
+    );
+
+}
+
+
+/* ==================================================
+   HINT
+================================================== */
+
+function hint(id) {
+
+  const element =
+    document.getElementById(id);
+
+  if (element) {
+
+    element.classList.toggle("show");
+
+  }
+
+}
+
+
+/* ==================================================
+   ROADMAP
+================================================== */
+
+function renderRoadmap() {
+
+  const roadmap =
+    document.getElementById("roadmap");
+
+
+  roadmap.innerHTML =
+    lessons
+      .map(
+        (lesson, index) => {
+
+          const done =
+            localStorage.getItem(
+              "lesson_" + lesson.id
+            );
+
+
+          return `
+
+            <div
+              class="
+                lesson-node
+                ${index === currentLesson ? "active" : ""}
+                ${done ? "done" : ""}
+              "
+              onclick="selectLesson(${index})"
+            >
+
+              <div class="node">
+                0${index + 1}
+              </div>
+
+              <div class="lesson-info">
+
+                <b>
+                  ${
+                    index === 0
+                      ? "Python cơ bản"
+                      : "HTML & CSS"
+                  }
+                </b>
+
+                <span>
+                  ${
+                    index === 0
+                      ? "print() & Biến"
+                      : "Tạo nút tương tác"
+                  }
+                </span>
+
+              </div>
+
+            </div>
+
+          `;
+
+        }
+      )
+      .join("");
+
+}
+
+
+/* ==================================================
+   CHỌN BÀI
+================================================== */
+
+function selectLesson(index) {
+
+  currentLesson =
+    index;
+
+
+  const lesson =
+    lessons[index];
+
+
+  document
+    .getElementById("lessonTag")
+    .innerHTML =
+      lesson.tag;
+
+
+  document
+    .getElementById("lessonTitle")
+    .innerHTML =
+      lesson.title;
+
+
+  document
+    .getElementById("lessonIntro")
+    .textContent =
+      lesson.intro;
+
+
+  document
+    .getElementById("crumb")
+    .textContent =
+      lesson.language === "python"
+        ? "Python"
+        : "HTML/CSS";
+
+
+  document
+    .getElementById("fileName")
+    .textContent =
+      lesson.file;
+
+
+  if (editor) {
+
+    editor.setValue(
+      lesson.code
+    );
+
+
+    monaco.editor.setModelLanguage(
+
+      editor.getModel(),
+
+      lesson.language === "python"
+        ? "python"
+        : "html"
+
+    );
+
+  }
+
+
+  renderLesson();
+
+  renderDocs();
+
+  renderRoadmap();
+
+
+  document
+    .getElementById("editorPanel")
+    .classList.add("open");
+
+}
+
+
+/* ==================================================
+   NỘI DUNG BÀI HỌC
+================================================== */
+
+function renderLesson() {
+
+  const lesson =
+    lessons[currentLesson];
+
+
+  if (
+    lesson.language ===
+    "python"
+  ) {
+
+    document
+      .getElementById("lessonContent")
+      .innerHTML = `
+
+        <section class="card glass">
+
+          <h2>
+            👋 Bắt đầu nào!
+          </h2>
+
+          <p class="text">
+
+            Trong Python,
+            <span class="code-inline">
+              print()
+            </span>
+
+            được sử dụng để xuất
+            dữ liệu ra màn hình.
+
+          </p>
+
+
+          <h3>
+            1. In một dòng chữ
+          </h3>
+
+          <p class="text">
+
+            Bạn chỉ cần đặt nội dung
+            muốn hiển thị bên trong
+            dấu ngoặc.
+
+          </p>
+
+
+          <div class="example">
+
+print("Xin chào!")
+
+          </div>
+
+
+          <h3>
+            2. Làm việc với biến
+          </h3>
+
+
+          <p class="text">
+
+            Biến giúp bạn lưu trữ
+            dữ liệu để sử dụng lại
+            trong chương trình.
+
+          </p>
+
+
+          <div class="example">
+
+ten = "An"
+
+tuoi = 15
+
+print(ten)
+
+print(tuoi)
+
+          </div>
+
+
+          <p
+            class="text"
+            style="margin-top:12px"
+          >
+
+            Python tự nhận biết
+            kiểu dữ liệu của biến.
+
+          </p>
+
+        </section>
+
+
+        <section class="card glass task">
+
+          <div class="task-title">
+
+            <h2>
+              🎯 Thử thách
+            </h2>
+
+            <span class="xp">
+              +100 XP
+            </span>
+
+          </div>
+
+
+          <p
+            class="text"
+            style="margin-top:10px"
+          >
+
+            Viết chương trình in
+            chính xác dòng chữ:
+
+          </p>
+
+
+          <div class="example">
+
+Chào mừng bạn đến với Lập trình!
+
+          </div>
+
+
+          <button
+            class="btn btn-warning"
+            onclick="hint('pythonHint')"
+          >
+            💡 Gợi ý
+          </button>
+
+
+          <div
+            class="hint"
+            id="pythonHint"
+          >
+
+            Dùng
+            <b>print()</b>
+            và đặt dòng chữ
+            trong dấu ngoặc kép.
+
+          </div>
+
+        </section>
+
+      `;
+
+  }
+
+
+  else {
+
+    document
+      .getElementById("lessonContent")
+      .innerHTML = `
+
+        <section class="card glass">
+
+          <h2>
+            🌐 Tạo giao diện đầu tiên
+          </h2>
+
+
+          <p class="text">
+
+            HTML dùng để tạo cấu trúc
+            của trang web.
+
+            Thẻ
+
+            <span class="code-inline">
+              &lt;button&gt;
+            </span>
+
+            tạo một nút bấm.
+
+          </p>
+
+
+          <h3>
+            1. Tạo nút
+          </h3>
+
+
+          <div class="example">
+
+&lt;button&gt;
+Bắt đầu học
+&lt;/button&gt;
+
+          </div>
+
+
+          <h3>
+            2. Đổi màu nút
+          </h3>
+
+
+          <div class="example">
+
+button {
+
+  background-color: green;
+
+}
+
+          </div>
+
+
+          <h3>
+            3. Hiệu ứng rê chuột
+          </h3>
+
+
+          <div class="example">
+
+button:hover {
+
+  background-color: darkgreen;
+
+}
+
+          </div>
+
+        </section>
+
+
+        <section class="card glass task">
+
+          <div class="task-title">
+
+            <h2>
+              🎯 Thử thách
+            </h2>
+
+            <span class="xp">
+              +150 XP
+            </span>
+
+          </div>
+
+
+          <p
+            class="text"
+            style="margin-top:10px"
+          >
+
+            Tạo nút
+            <b>"Bắt đầu học"</b>
+            màu xanh lá.
+
+            Khi rê chuột vào,
+            nút chuyển sang xanh đậm.
+
+          </p>
+
+
+          <button
+            class="btn btn-warning"
+            onclick="hint('htmlHint')"
+          >
+            💡 Gợi ý
+          </button>
+
+
+          <div
+            class="hint"
+            id="htmlHint"
+          >
+
+            Dùng
+
+            <b>
+              background-color: green
+            </b>
+
+            và
+
+            <b>
+              button:hover
+            </b>
+
+            với
+
+            <b>
+              darkgreen
+            </b>.
+
+          </div>
+
+        </section>
+
+      `;
+
+  }
+
+}
+
+
+/* ==================================================
+   CHEAT SHEET
+================================================== */
+
+function renderDocs() {
+
+  const docs =
+    document.getElementById(
+      "docsContent"
+    );
+
+
+  if (currentLesson === 0) {
+
+    docs.innerHTML = `
+
+      <section class="card glass">
+
+        <h2>
+          📚 Cheat Sheet — Python
+        </h2>
+
+        <p class="text">
+          Các kiểu dữ liệu cơ bản:
+        </p>
+
+
+        <div class="example">
+
+String  → "Xin chào"
+
+Int     → 15
+
+Float   → 3.14
+
+Bool    → True
+
+        </div>
+
+      </section>
+
+
+      <section class="card glass">
+
+        <h2>
+          ⚡ Cú pháp nhanh
+        </h2>
+
+
+        <div class="example">
+
+print("Nội dung")
+
+ten = "Nam"
+
+tuoi = 15
+
+diem = 8.5
+
+kiem_tra = True
+
+        </div>
+
+      </section>
+
+    `;
+
+  }
+
+
+  else {
+
+    docs.innerHTML = `
+
+      <section class="card glass">
+
+        <h2>
+          📚 Cheat Sheet — HTML/CSS
+        </h2>
+
+
+        <div class="example">
+
+&lt;button&gt;
+Nội dung
+&lt;/button&gt;
+
+
+button {
+
+  background-color: green;
+
+}
+
+
+button:hover {
+
+  background-color: darkgreen;
+
+}
+
+        </div>
+
+      </section>
+
+    `;
+
+  }
+
+}
+
+
+/* ==================================================
+   CONSOLE
+================================================== */
+
+function printConsole(
+  text,
+  type = ""
+) {
+
+  const consoleBox =
+    document.getElementById(
+      "console"
+    );
+
+
+  consoleBox.textContent =
+    text;
+
+
+  consoleBox.className =
+    "console-body " +
+    type;
+
+}
+
+
+/* ==================================================
+   PYODIDE
+================================================== */
+
+async function loadPy() {
+
+  if (pyodide) {
+
+    return pyodide;
+
+  }
+
+
+  printConsole(
+    "Đang tải môi trường Python WebAssembly..."
+  );
+
+
+  try {
+
+    pyodide =
+      await loadPyodide({
+
+        indexURL:
+          "https://cdn.jsdelivr.net/pyodide/v0.27.7/full/"
+
+      });
+
+
+    return pyodide;
+
+  }
+
+
+  catch (error) {
+
+    printConsole(
+
+      "Không thể tải môi trường Python.\n\n" +
+      "Hãy kiểm tra kết nối Internet.",
+
+      "error"
+
+    );
+
+
+    throw error;
+
+  }
+
+}
+
+
+/* ==================================================
+   DỊCH LỖI PYTHON
+================================================== */
+
+function translateError(error) {
+
+  return String(error)
+
+    .replace(
+      "SyntaxError",
+      "Lỗi cú pháp"
+    )
+
+    .replace(
+      "NameError",
+      "Lỗi tên biến"
+    )
+
+    .replace(
+      "TypeError",
+      "Lỗi kiểu dữ liệu"
+    )
+
+    .replace(
+      "IndentationError",
+      "Lỗi thụt lề"
+    )
+
+    .replace(
+      "ZeroDivisionError",
+      "Không thể chia cho 0"
+    );
+
+}
+
+
+/* ==================================================
+   CHẠY PYTHON
+================================================== */
+
+async function runPython(code) {
+
+  try {
+
+    const py =
+      await loadPy();
+
+
+    py.runPython(`
+
+import sys
+
+from io import StringIO
+
+sys.stdout = StringIO()
+
+sys.stderr = StringIO()
+
+    `);
+
+
+    py.runPython(code);
+
+
+    const output =
+      py.runPython(
+        "sys.stdout.getvalue()"
+      );
+
+
+    const error =
+      py.runPython(
+        "sys.stderr.getvalue()"
+      );
+
+
+    if (error) {
+
+      printConsole(
+
+        "Lỗi Python:\n" +
+        translateError(error),
+
+        "error"
+
+      );
+
+    }
+
+
+    else {
+
+      printConsole(
+
+        output ||
+        "Chương trình đã chạy nhưng không có dữ liệu xuất ra.",
+
+        "success"
+
+      );
+
+    }
+
+  }
+
+
+  catch (error) {
+
+    printConsole(
+
+      "Lỗi Python:\n" +
+      translateError(
+        error.message ||
+        String(error)
+      ),
+
+      "error"
+
+    );
+
+  }
+
+}
+
+
+/* ==================================================
+   CHẠY HTML
+================================================== */
+
+function runHTML(code) {
+
+  const win =
+    window.open(
+      "",
+      "_blank",
+      "width=650,height=650"
+    );
+
+
+  if (!win) {
+
+    printConsole(
+
+      "Trình duyệt đã chặn cửa sổ xem trước.",
+
+      "error"
+
+    );
+
+    return;
+
+  }
+
+
+  win.document.open();
+
+  win.document.write(code);
+
+  win.document.close();
+
+
+  printConsole(
+
+    "Đã mở bản xem trước HTML trong cửa sổ mới.",
+
+    "success"
+
+  );
+
+}
+
+
+/* ==================================================
+   CHẠY CODE
+================================================== */
+
+async function runCode() {
+
+  if (!editor) {
+
+    return;
+
+  }
+
+
+  const lesson =
+    lessons[currentLesson];
+
+
+  document
+    .getElementById("status")
+    .textContent =
+      "Đang chạy...";
+
+
+  const code =
+    editor.getValue();
+
+
+  if (
+    lesson.language ===
+    "python"
+  ) {
+
+    await runPython(code);
+
+  }
+
+
+  else if (
+    lesson.language ===
+    "html"
+  ) {
+
+    runHTML(code);
+
+  }
+
+
+  document
+    .getElementById("status")
+    .textContent =
+      "Đã chạy";
+
+}
+
+
+/* ==================================================
+   KIỂM TRA PYTHON
+================================================== */
+
+async function checkPython(
+  code,
+  lesson
+) {
+
+  try {
+
+    const py =
+      await loadPy();
+
+
+    py.runPython(`
+
+import sys
+
+from io import StringIO
+
+sys.stdout = StringIO()
+
+    `);
+
+
+    py.runPython(code);
+
+
+    const output =
+      py.runPython(
+        "sys.stdout.getvalue()"
+      )
+      .trim();
+
+
+    if (
+      output ===
+      lesson.answer
+    ) {
+
+      successLesson(
+        lesson
+      );
+
+    }
+
+
+    else {
+
+      printConsole(
+
+        "Chưa đúng.\n\n" +
+
+        "Kết quả hiện tại:\n" +
+
+        output,
+
+        "error"
+
+      );
+
+    }
+
+  }
+
+
+  catch (error) {
+
+    printConsole(
+
+      "Code đang có lỗi:\n\n" +
+
+      translateError(
+        error.message ||
+        String(error)
+      ),
+
+      "error"
+
+    );
+
+  }
+
+}
+
+
+/* ==================================================
+   KIỂM TRA HTML
+================================================== */
+
+function checkHTML(
+  code,
+  lesson
+) {
+
+  const normalized =
+    code
+      .toLowerCase()
+      .replace(/\s/g, "");
+
+
+  const hasButton =
+    normalized.includes(
+      "<button>bắtđầuhọc</button>"
+    );
+
+
+  const hasGreen =
+    normalized.includes(
+      "background-color:green"
+    );
+
+
+  const hasHover =
+    normalized.includes(
+      "button:hover"
+    );
+
+
+  const hasDark =
+    normalized.includes(
+      "background-color:darkgreen"
+    );
+
+
+  if (
+    hasButton &&
+    hasGreen &&
+    hasHover &&
+    hasDark
+  ) {
+
+    successLesson(
+      lesson
+    );
+
+  }
+
+
+  else {
+
+    printConsole(
+
+      `Chưa đạt yêu cầu.
+
+Hãy kiểm tra:
+
+• Nội dung nút là "Bắt đầu học"
+
+• Màu ban đầu là xanh lá
+
+• Có bộ chọn button:hover
+
+• Màu khi rê chuột là xanh đậm`,
+
+      "error"
+
+    );
+
+  }
+
+}
+
+
+/* ==================================================
+   KIỂM TRA ĐÁP ÁN
+================================================== */
+
+async function checkAnswer() {
+
+  if (!editor) {
+
+    return;
+
+  }
+
+
+  const lesson =
+    lessons[currentLesson];
+
+
+  const code =
+    editor.getValue();
+
+
+  if (
+    lesson.language ===
+    "python"
+  ) {
+
+    await checkPython(
+      code,
+      lesson
+    );
+
+  }
+
+
+  else if (
+    lesson.language ===
+    "html"
+  ) {
+
+    checkHTML(
+      code,
+      lesson
+    );
+
+  }
+
+}
+
+
+/* ==================================================
+   HOÀN THÀNH BÀI
+================================================== */
+
+function successLesson(
+  lesson
+) {
+
+  const key =
+    "lesson_" +
+    lesson.id;
+
+
+  if (
+    !localStorage.getItem(key)
+  ) {
+
+    localStorage.setItem(
+      key,
+      "done"
+    );
+
+
+    const oldXP =
+      Number(
+        localStorage.getItem(
+          "xp"
+        ) || 0
+      );
+
+
+    localStorage.setItem(
+
+      "xp",
+
+      oldXP +
+      lesson.xp
+
+    );
+
+  }
+
+
+  printConsole(
+
+    `🎉 Chính xác!
+
+Bạn đã hoàn thành bài học.
+
++${lesson.xp} XP`,
+
+    "success"
+
+  );
+
+
+  confetti();
+
+
+  updateStats();
+
+  renderRoadmap();
+
+}
+
+
+/* ==================================================
+   LÀM LẠI
+================================================== */
+
+function resetCode() {
+
+  if (!editor) {
+
+    return;
+
+  }
+
+
+  editor.setValue(
+    lessons[currentLesson].code
+  );
+
+
+  printConsole(
+    "Đã khôi phục code ban đầu."
+  );
+
+}
+
+
+/* ==================================================
+   XP + TIẾN ĐỘ
+================================================== */
+
+function updateStats() {
+
+  const xp =
+    Number(
+      localStorage.getItem(
+        "xp"
+      ) || 0
+    );
+
+
+  const completed =
+    lessons.filter(
+      lesson =>
+        localStorage.getItem(
+          "lesson_" +
+          lesson.id
+        )
+    ).length;
+
+
+  const percentage =
+    Math.round(
+      completed /
+      lessons.length *
+      100
+    );
+
+
+  document
+    .getElementById("xp")
+    .textContent =
+      xp +
+      " XP";
+
+
+  document
+    .getElementById("progress")
+    .style.width =
+      percentage +
+      "%";
+
+
+  document
+    .getElementById("progressText")
+    .textContent =
+      percentage +
+      "%";
+
+
+  if (
+    completed >= 1
+  ) {
+
+    document
+      .getElementById("badge2")
+      .classList
+      .remove("locked");
+
+  }
+
+
+  if (
+    completed >= 2
+  ) {
+
+    document
+      .getElementById("badge3")
+      .classList
+      .remove("locked");
+
+  }
+
+}
+
+
+/* ==================================================
+   CONFETTI
+================================================== */
+
+function confetti() {
+
+  const colors = [
+
+    "#6366f1",
+
+    "#22c55e",
+
+    "#f59e0b",
+
+    "#ef4444",
+
+    "#06b6d4"
+
+  ];
+
+
+  for (
+    let i = 0;
+    i < 70;
+    i++
+  ) {
+
+    const element =
+      document.createElement(
+        "i"
+      );
+
+
+    element.style.position =
+      "fixed";
+
+
+    element.style.width =
+      "8px";
+
+
+    element.style.height =
+      "8px";
+
+
+    element.style.left =
+      Math.random() *
+      100 +
+      "vw";
+
+
+    element.style.top =
+      "-10px";
+
+
+    element.style.zIndex =
+      "9999";
+
+
+    element.style.borderRadius =
+      "2px";
+
+
+    element.style.background =
+      colors[
+        Math.floor(
+          Math.random() *
+          colors.length
+        )
+      ];
+
+
+    document.body
+      .appendChild(
+        element
+      );
+
+
+    const duration =
+      1000 +
+      Math.random() *
+      1600;
+
+
+    element.animate(
+
+      [
+
+        {
+          transform:
+            "translateY(0) rotate(0deg)",
+
+          opacity: 1
+        },
+
+        {
+
+          transform:
+            `translateY(110vh) rotate(${Math.random() * 900}deg)`,
+
+          opacity: 0
+
+        }
+
+      ],
+
+      {
+
+        duration,
+
+        easing:
+          "cubic-bezier(.2,.8,.3,1)"
+
+      }
+
+    );
+
+
+    setTimeout(
+      () =>
+        element.remove(),
+      duration
+    );
+
+  }
+
+}
+
+
+/* ==================================================
+   MOBILE
+================================================== */
+
+function openEditor() {
+
+  document
+    .getElementById("editorPanel")
+    .classList.add("open");
+
+}
+
+
+function scrollMain() {
+
+  window.scrollTo({
+
+    top: 0,
+
+    behavior: "smooth"
+
+  });
+
+
+  document
+    .getElementById("editorPanel")
+    .classList
+    .remove("open");
+
+}
+
+
+/* ==================================================
+   KHỞI ĐỘNG
+================================================== */
+
+if (
+  localStorage.getItem(
+    "codevn-theme"
+  ) === "dark"
+) {
+
+  document.body
+    .classList
+    .add("dark");
+
+}
+
+
+renderRoadmap();
+
+renderLesson();
+
+renderDocs();
+
+updateStats(); 
