@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="theme-color" content="#6366f1">
+  <meta name="description" content="CodeVN - Nền tảng học lập trình tương tác bằng tiếng Việt">
+
+  <title>CodeVN — Học Lập Trình</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- ================= SIDEBAR ================= -->
+
+  <aside class="sidebar glass">
+
+    <div class="logo">
+      <div class="logo-icon">&lt;/&gt;</div>
+      <span>CodeVN</span>
+    </div>
+
+    <div class="profile glass">
+
+      <div class="profile-top">
+
+        <div class="avatar">
+          HV
+        </div>
+
+        <div>
+          <b>Học viên</b>
+          <br>
+          <small>Người chinh phục code</small>
+        </div>
+
+      </div>
+
+      <div class="stats">
+
+        <div class="stat">
+          <b id="xp">0 XP</b>
+          <span>Điểm kinh nghiệm</span>
+        </div>
+
+        <div class="stat">
+          <b>🔥 <span id="streak">1</span></b>
+          <span>Ngày liên tiếp</span>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="section-title">
+      Lộ trình học
+    </div>
+
+    <div
+      class="roadmap"
+      id="roadmap"
+    ></div>
+
+    <div class="progress-box glass">
+
+      <div class="progress-row">
+
+        <b>Tiến độ</b>
+
+        <span id="progressText">
+          0%
+        </span>
+
+      </div>
+
+      <div class="progress-line">
+
+        <div
+          class="progress-fill"
+          id="progress"
+        ></div>
+
+      </div>
+
+      <small>
+        Hoàn thành bài tập để mở khóa huy hiệu.
+      </small>
+
+      <div class="section-title badge-title">
+        Huy hiệu
+      </div>
+
+      <div class="badges">
+
+        <div class="badge">
+          🔥
+        </div>
+
+        <div
+          class="badge locked"
+          id="badge2"
+        >
+          🐍
+        </div>
+
+        <div
+          class="badge locked"
+          id="badge3"
+        >
+          🏆
+        </div>
+
+      </div>
+
+    </div>
+
+  </aside>
+
+
+  <!-- ================= MAIN ================= -->
+
+  <main class="main">
+
+    <div class="topbar">
+
+      <div class="crumb">
+        Học tập /
+        <b id="crumb">
+          Python
+        </b>
+      </div>
+
+      <button
+        class="icon-btn"
+        onclick="toggleTheme()"
+        title="Đổi giao diện"
+      >
+        ☀️
+      </button>
+
+    </div>
+
+
+    <section class="hero glass">
+
+      <div
+        class="tag"
+        id="lessonTag"
+      >
+        BÀI 1 · PYTHON
+      </div>
+
+      <h1 id="lessonTitle"></h1>
+
+      <p id="lessonIntro"></p>
+
+    </section>
+
+
+    <div class="tabs">
+
+      <button
+        class="tab active"
+        onclick="switchTab('lesson', this)"
+      >
+        📘 Bài học
+      </button>
+
+      <button
+        class="tab"
+        onclick="switchTab('docs', this)"
+      >
+        📚 Nguồn tham khảo
+      </button>
+
+    </div>
+
+
+    <div id="lessonContent"></div>
+
+    <div
+      id="docsContent"
+      class="hidden"
+    ></div>
+
+  </main>
+
+
+  <!-- ================= EDITOR ================= -->
+
+  <section
+    class="right glass"
+    id="editorPanel"
+  >
+
+    <div class="editor-header">
+
+      <div class="file-name">
+
+        <span class="dot"></span>
+
+        <span id="fileName">
+          bai1.py
+        </span>
+
+      </div>
+
+
+      <div class="controls">
+
+        <button
+          class="btn btn-secondary"
+          onclick="resetCode()"
+        >
+          Làm lại
+        </button>
+
+        <button
+          class="btn btn-primary"
+          onclick="runCode()"
+        >
+          ▶ Chạy thử code
+        </button>
+
+        <button
+          class="btn btn-success"
+          onclick="checkAnswer()"
+        >
+          ✓ Kiểm tra đáp án
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div id="editor"></div>
+
+
+    <div class="console">
+
+      <div class="console-head">
+
+        <span>
+          CONSOLE OUTPUT
+        </span>
+
+        <span id="status">
+          Sẵn sàng
+        </span>
+
+      </div>
+
+      <div
+        class="console-body"
+        id="console"
+      >
+Chào mừng bạn đến với CodeVN!
+Hãy viết code rồi nhấn "Chạy thử code".
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<!-- ================= MOBILE NAV ================= -->
+
+<div class="mobile-nav glass">
+
+  <button onclick="scrollMain()">
+    📚
+    <br>
+    Học
+  </button>
+
+  <button onclick="openEditor()">
+    ⌨️
+    <br>
+    Code
+  </button>
+
+  <button onclick="toggleTheme()">
+    🌙
+    <br>
+    Giao diện
+  </button>
+
+</div>
+
+
+<!-- Monaco -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.2/min/vs/loader.min.js"></script>
+
+<!-- Pyodide -->
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js"></script>
+
+
+<!-- Dữ liệu bài học -->
+
+<script src="lessons.js"></script>
+
+<!-- Logic ứng dụng -->
+
+<script src="app.js"></script>
+
+</body>
+      </html> 
